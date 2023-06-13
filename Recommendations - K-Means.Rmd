@@ -1,0 +1,209 @@
+---
+title: "K-means & Visualization of Time Series Data"
+author: "Ayla Pollmann"
+output: 
+  html_document:
+    toc: true 
+    toc_depth: 3
+    number_sections: true 
+    theme: yeti     
+---
+
+***
+<div style="text-align: justify"> 
+For my second PhD project, I learned another exciting method: **K-means**.  
+
+Here, you will find an easy to follow example of how to get started with K-Means and helpful resources that guided me throughout my project.
+
+If you are interesting in reading more on network analysis in the wild, [here is the link to the code]() of my article ["Neurodevelopmental Changes after Adversity in Early Adolescence".]()
+</div>
+
+***
+
+*References are linked throughout the text.*  
+
+***
+
+# **Introduction**  
+
+K-means is an unsupervised learning method (i.e., without categorical specifications). This method minimizes the average squared distance between points in the same cluster and is used to group objects into clusters (Hartigan & Wong, 1979; Jain, 2010; Lloyd, 1982). K-means is partitioning observations in "k" clusters. Each observation is sorted into a cluster with the closest average.
+With this technique in psychological research, we can find, for example, subgroups in population studies, or in other words, participants with similar characteristics in specific variables.
+
+These are the steps we will follow during this short tutorial:
+
+(1) We will determine the optimal number of clusters with the commonly used Elbow and Silhouette methods. 
+
+(2) We will conduct a K-means analysis.
+
+(3) We visualized the clusters across two time points using ggplot.
+
+***
+
+## Set-up
+
+```{r setup, warning=FALSE,error=FALSE,message=FALSE}
+# Load necessary libraries for data analysis and visualization
+
+## Data Wrangling and Cleaning
+library(tidyverse) # collection of R packages for data manipulation and visualization
+library(dplyr) # for data wrangling
+library(tidyr) # for data tidying
+library(readr) # for reading and writing flat files
+library(reshape2)
+
+## Data Visualization
+library(ggplot2) # for data visualization
+library(ggeffects) # for plotting marginal effects
+library(marginaleffects) # for plotting marginal effects
+library(gplots)
+
+## Machine Learning
+library(caret) # for machine learning workflows
+library(nnet) # for neural network modeling
+library(MASS) # for linear regression modeling
+library(NbClust) # Silhouette & Elbow
+library(factoextra) # multivariate analysis
+
+# Define custom color palette
+my_colors <- c("#F4A261","#E76F51","#264653","#2A9D8F","#E9C46A") 
+```
+
+## Star Wars Dataset
+
+We will use the build in data set "starwars" from the dplyr package.You can find more information on this data set [here](https://dplyr.tidyverse.org/reference/starwars.html).
+
+```{r prepare data & workspace,warning=FALSE,error=FALSE,message=FALSE}
+#load data
+Data <- starwars
+
+#remove rows with missing values
+Data <- na.omit(Data)
+```
+
+# **Example 1: Silhouette & Elbow Method**
+Before we conduct the actual K-Means analysis, we need to determine the optimal number of clusters. [Here you can find more information on different techniques of clustering.](https://www.r-bloggers.com/2017/02/finding-optimal-number-of-clusters/)
+In this example we are determining the optimal number of clusters based on height and mass of Star Wars character.
+```{r, warning=FALSE,error=FALSE,message=FALSE}
+#Elbow Method
+Elb <- fviz_nbclust(Data[,2:3], kmeans, method = "wss") +  #within cluster sums of squares
+     labs(subtitle = "Elbow method_AllTracts")
+Elb
+
+#Silhouette Method
+Sil <- fviz_nbclust(Data[,2:3], kmeans, method = "silhouette")+   #average silhouette
+      labs(subtitle = "Silhouette method_AllTracts")
+Sil
+```
+
+The optimal number of clusters appears to be 4!
+
+## K-means Clustering
+Clustering based on height and mass of Star Wars character. You can find more information on KMeans clustering [here](https://statsandr.com/blog/clustering-analysis-k-means-and-hierarchical-clustering-by-hand-and-in-r/)
+```{r, warning=FALSE,error=FALSE,message=FALSE,results='hide'}
+# The K is randomly allocated, which is why you need to set a seed at the start
+set.seed(123)
+
+#K-Means clustering with 4 k
+KMeans <- kmeans(Data[,2:3], 4, iter.max = 10, nstart = 50) 
+
+#Information on the clusters
+KMeans$size
+KMeans$centers
+summary(KMeans)
+```
+
+```{r, warning=FALSE,error=FALSE,message=FALSE}
+#Visualization of clusters
+fviz_cluster(KMeans, data=Data,choose.vars = c("height","mass"), alpha=0.2, shape=19, geom = "point", ellipse.type = c("norm"))
+```
+
+It seems that the less mass (weight), the lower the height and the heigher the weight the heigher the height. This seems to be an pretty intuitive result!
+
+# **Example 2: Clustering with two time points**
+In this example we are working with two time points. First, we are creating now two time points of height measurements for star wars characters.
+```{r, warning=FALSE,error=FALSE,message=FALSE}
+set.seed(145)
+
+# Create random height variable and naming it T2
+Data$T2 <- sample(99:288, size = nrow(Data), replace = TRUE)
+
+# Name original height as T1
+names(Data)[2] <- "T1"
+
+# Change order to make T1 and T2 follow each other
+Data <- Data[, c(1,2,15,3,4,5,6,7,8,9,10,11,12,13,14)]  
+```
+
+## Silhouette & Elbow Method
+Determine the optimal number of clusters based on height at T1 and T2
+```{r, warning=FALSE,error=FALSE,message=FALSE}
+#Elbow Method
+Elb <- fviz_nbclust(Data[,2:3], kmeans, method = "wss") +  #within cluster sums of squares
+     labs(subtitle = "Elbow method_AllTracts")
+Elb
+
+#Silhouette Method
+Sil <- fviz_nbclust(Data[,2:3], kmeans, method = "silhouette")+   #average silhouette
+      labs(subtitle = "Silhouette method_AllTracts")
+Sil
+```
+
+The optimal number of clusters appears to be 2!
+
+## K-means Clustering
+```{r, warning=FALSE,error=FALSE,message=FALSE,results='hide'}
+set.seed(123)
+
+#K-Means clustering with 2 k
+KMeans_V2 <- kmeans(Data[,2:3], 2, iter.max = 10, nstart = 50) 
+
+#Number of participants per cluster
+KMeans_V2$size
+```
+
+## Visualization of K-means Clustering with two time points
+To visualize the height of participants and the change of height across the two time points depended on which cluster they are in, we have adapted a graph provided by the paper: [Developmental cognitive neuroscience using latent change score models: A tutorial and applications](https://www.sciencedirect.com/science/article/pii/S187892931730021X) by Kievit et al. (2018)
+```{r vis, warning=FALSE,error=FALSE,message=FALSE}
+#Define which character is in which group
+Groups <- as.factor(KMeans_V2$cluster)
+
+#Define sample size (in other words, number of observations or participants)
+samplesize <- 29
+
+#Assign ID to participants
+id=factor(1:samplesize)
+
+#Create a data frame for plotting
+PlotCluster <- data.frame(c(Data$T1),     #select time point 1
+                              c(Data$T2),     #select time point 2
+                              as.factor(c(id,id)),   #Give ID to participants
+                              as.factor(Groups))   #insert cluster membership
+
+#Rename column names
+colnames(PlotCluster)<-c('T1','T2','ID','Cluster')  #give column name
+
+#Reshape data for plotting
+PlotAllClusters<-melt(PlotCluster,by='ID')
+
+#Plot to visualize clusters
+ggplot(PlotAllClusters,aes(variable,value,group=ID,col=Cluster)) +
+  geom_point(position = "jitter", size=1,alpha=.3) +  # add jittered points with low opacity
+  geom_line(position = "jitter", alpha=.1) +  # add jittered lines with low opacity
+  stat_smooth(aes(group=Cluster), colour="black", 
+              method="loess", se=F, size=0.5, formula = 'y~x') +  # add a loess smoothed line
+  ylab('Height') +  # add y-axis label
+  xlab('Time points') +  # add x-axis label
+  facet_grid(~factor(Cluster, levels=c("1","2")), 
+             labeller = as_labeller(c("1" = "Cluster 1","2" = "Cluster 2"))) +  # rename the top labels
+  scale_color_manual(values = my_colors, 
+                     breaks =c("1","2")) +  # set the colors for the points and lines
+  guides(col = FALSE) +  # remove the legend for the color scale
+  theme(axis.title = element_text(size = 14), 
+        axis.text = element_text(size = 12), 
+        strip.text = element_text(size = 14))  # customize the text
+```
+
+You can see that in the two clusters, there is one cluster with a decreasing and one cluster with an increasing trend!
+
+
+*If you have any questions, please don't hesitate to get in touch: Ayla.Pollmann@kcl.ac.uk. If you are interested in more methods, please see my website: [www.aylapollmann.com](www.aylapollmann.com).*
