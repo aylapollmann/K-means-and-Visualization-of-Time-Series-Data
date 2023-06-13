@@ -3,12 +3,10 @@ For my second PhD project, I learned another exciting method: K-means.  Here, yo
 
 The html version of this code can be found on my website or here: https://kmeans-timeseries.netlify.app/
 
-References are linked throughout the text.
-
-Introduction
-
+Overview
 First, we will conduct a K-Means analysis and then we will visualize the clusters as time series data.
 
+What is K-means?
 K-means is an unsupervised learning method (i.e., without categorical specifications). This method minimizes the average squared distance between points in the same cluster and is used to group objects into clusters (Hartigan & Wong, 1979; Jain, 2010; Lloyd, 1982). K-means is partitioning observations in “k” clusters. Each observation is sorted into a cluster with the closest average. With this technique in psychological research, we can find, for example, subgroups in population studies, or in other words, participants with similar characteristics in specific variables.
 
 These are the steps we will follow during this short tutorial:
