@@ -1,5 +1,5 @@
 # K-means-and-Visualization-of-Time-Series-Data
-For my second PhD project, I learned another exciting method: K-means.  Here, you will find an easy to follow example of how to get started with K-Means and helpful resources that guided me throughout my project. This code was used for article “Neurodevelopmental Changes after Adversity in Early Adolescence”, which is currently under review.
+For my second PhD project, I learned another exciting method: K-means.  Here, you will find an easy to follow example of how to get started with K-Means in R and helpful resources that guided me throughout my project. This R Markdown code was used for article “Neurodevelopmental Changes after Adversity in Early Adolescence”, which is currently under review.
 
 The html version of this code can be found on my website or here: https://kmeans-timeseries.netlify.app/
 
